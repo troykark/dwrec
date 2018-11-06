@@ -1,7 +1,7 @@
 import sys, pygame, random, colors, math
 pygame.init()
 
-size = width, height = 1000,700
+size = width, height = 1300,800
 
 BLACK = ( 0, 0, 0)
 WHITE = (255, 255, 255)
@@ -158,131 +158,24 @@ def animate_water(grid, time):
             elif rand > .75:
                 x.set_col(colors.blue7)
 
-class Port:
-    def __init__ (self, location):
-        self. location = location
-    def get_location(self):
-        return self.location
-
-class Boat:
-    def __init__(self, location, vector = [0,0], image = "boat.bmp", heading = 135, ai = False):
-        self.loc = location
-        self.destinations = []
-        self.heading = heading
-        self.vect = vector
-        self.pyimage = pygame.image.load(image)
-        self.pyimage.set_colorkey((255,255,255))
-        self.rect = self.pyimage.get_rect()
-        self.rect.move(self.loc)
-        self.ai = ai
-    def move(self, vect):
-        self.get_vector()
-
-        if not grid.get_tile(self.loc[0] + self.vect[0], self.loc[1] +self.vect[1]).blocked():
-            self.vect = [0,0]    
-        self.loc[0] += self.vect[0]
-        self.loc[1] += self.vect[1]
-        self.rect.move(self.loc)
-        self.get_vector()
-    def get_loc(self):
-        return self.loc
-    def get_vect(self):
-        return self.vect
-    def get_vector(self):
-        self.vect = [math.sin(math.radians(self.heading)), math.cos(math.radians(self.heading))]
-    def get_destination(self):
-        return self.destinations[0]
-    def add_destination(self, port):
-        self.destinations.append(port)
-    def boat_ai(self, tile):
-        
-        if self.ai != False:
-             pass
-        if self.ai == "simpletravel":
-            self.get_vector()
-            if not grid.get_tile((self.loc[0] + self.vect[0]), (self.loc[1] +self.vect[1])).blocked():
-                self.heading += 15
-            elif not grid.get_tile((self.loc[0] + self.vect[0]*20) , (self.loc[1] +self.vect[1]*20)).blocked():
-                self.heading += 10
-            elif not grid.get_tile((self.loc[0] + self.vect[0]*30) , (self.loc[1] +self.vect[1]*30)).blocked():
-                self.heading += 7
-            else:
-  #              print [self.get_destination().get_location().get_loc()[0] - self.loc[0],self.get_destination().get_location().get_loc()[1] - self.loc[1]]
-  #              dest_vect =  [self.get_destination().get_location().get_loc[0] - self.loc[0],self.get_destination().get_location.get_loc()[1] - self.loc[1]]
-                pass
-    
-def populate_boats(num, boats):
-    for x in range(num):
-        blocation = [random.randint(1,grid.get_height() -grid.get_tile_size()), random.randint(1, grid.get_width()-grid.get_tile_size())]
-        while not grid.get_tile(blocation[0], blocation[1]).blocked():
-            blocation = [random.randint(1, grid.get_height()-grid.get_tile_size()), random.randint(1,grid.get_width()-grid.get_tile_size())]
-
-        boats.append(Boat(blocation, heading = random.randint(0, 360), ai = 'simpletravel'))
-    return boats            
-
-def populate_ports(num, ports):
-    for x in range(num):
-        found = False
-        while not found:
-            ptile = random.choice([x for x in grid.tilegen()])
-            if not ptile.blocked():
-                for x in grid.get_neighbors(ptile.get_loc()[0],ptile.get_loc()[1],4):
-                    if grid.get_tile(x[0],x[1]).blocked():
-                        ports.append(Port(ptile))
-                        ptile.set_col(RED)
-                        found = True
-
-    return ports    
 
 
-
-
-
-####################SEEDS and SHIP and PORT BUILDIN###########################    
-aboat = Boat([100,100])
-bboat = Boat([150,150], heading = 100, ai = 'simpletravel')
-##boat = pygame.image.load("boat.bmp")
-##boat.set_colorkey((255,255,255))
-##boatrect = boat.get_rect()
 
 
 
 grid = Grid(int(size[0]-size[0]*0.24), size[1],10)
 seed = random.sample([x for x in grid.tilegen()],10)
 time = 0
-#boats = [aboat, bboat]
-#boats = [bboat]
-boats = []
-ports = []
-for island in seed:
-    pass
+
 elevation_random_walk(seed)
-boats = populate_boats(10, boats)
-ports = populate_ports(4, ports)
-
-for b in boats:
-    b.add_destination(random.choice(ports))
 
 
-
-
-###################MAIN LOOP#####################
 while 1:
     clock.tick(1000)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
           
-        elif event.type == pygame.KEYDOWN:
-##            if event.key == pygame.K_UP:
-##                boatrect = boatrect.move([0,-1])
-##            if event.key == pygame.K_DOWN:
-##                boatrect = boatrect.move([0,1])
-            if event.key == pygame.K_LEFT:
-                boats[0].heading += 3
-                
-            if event.key == pygame.K_RIGHT:
-                boats[0].heading -= 3
                 
     screen.fill(BLACK)
             
@@ -294,34 +187,6 @@ while 1:
                                         grid.get_tile_size(),
                                         grid.get_tile_size()],
                         0)
-
-    
-    #animate_water(grid, time)
-    if time%5 == 0:
-        for boat in boats:
-            boat.boat_ai(grid.get_tile(int(boat.loc[0]), int(boat.loc[1])))
-            boat.move(boat.vect)
-            
-            pygame.draw.lines(screen, (255, 255, 255), False, 
-                      [(boat.get_loc()[0], boat.get_loc()[1]), ((boat.get_vect()[0]*12) + boat.get_loc()[0],
-                                    (boat.get_vect()[1]*12)+boat.get_loc()[1])], 2)
-            screen.blit(boat.pyimage, boat.loc)
-            
-    else:
-        for boat in boats:
-            pygame.draw.lines(screen, (255, 255, 255), False, 
-                      [(boat.get_loc()[0], boat.get_loc()[1]), ((boat.get_vect()[0]*12) + boat.get_loc()[0],
-                                    (boat.get_vect()[1]*12)+boat.get_loc()[1])], 2)
-            screen.blit(boat.pyimage, boat.loc)
-        pygame.draw.lines(screen, (255, 255, 255), False,
-                      [(875, 100), ((boats[0].vect[0]*60) + 875,
-                                    (boats[0].vect[1]*60)+100)], 2)
-#    screen.blit(boat, boatrect)
-    pygame.draw.lines(screen, (255, 255, 255), False,
-                      [(875, 100), ((boats[0].vect[0]*60) + 875,
-                                    (boats[0].vect[1]*60)+100)], 2)
     pygame.display.flip()
     time +=1
-
-            
     
