@@ -16,6 +16,11 @@ color_elevation = {0:colors.blue4, 1: colors.blue8, 2:colors.blue9, 3:colors.yel
                    9:colors.green5, 10:colors.green4, 11:colors.green4,
                    12:colors.gray4, 13:colors.gray6, 14:colors.gray8, 15:colors.white}
 screen = pygame.display.set_mode(size)
+class Game: 
+    def __init__(self, height, width, tile_size):
+        self.runningstate = "WorldMap"
+        self.grid   = Grid(height, width, tile_size)
+        self.player = Player(self.grid)
 
 class Tile:
     '''
@@ -127,14 +132,14 @@ def bump_elvt(row, col, change):
     '''
     initial building block of map gen
     '''
-    grid.get_tile(row,col).change_elevation(random.randint(2,3)*change)
-    for tile in grid.get_neighbors(row,col,8):
-        grid.get_tile(tile[0], tile[1]).change_elevation(1*change)    
-        #grid.get_tile(tile[0], tile[1]).change_elevation(random.randint(-1,1))
-    for tile in grid.get_neighbors(row,col,4):
+    game.grid.get_tile(row,col).change_elevation(random.randint(2,3)*change)
+    for tile in game.grid.get_neighbors(row,col,8):
+        game.grid.get_tile(tile[0], tile[1]).change_elevation(1*change)    
+        #game.grid.get_tile(tile[0], tile[1]).change_elevation(random.randint(-1,1))
+    for tile in game.grid.get_neighbors(row,col,4):
         
-        #grid.get_tile(tile[0], tile[1]).change_elevation(random.randint(0,1))
-        grid.get_tile(tile[0], tile[1]).change_elevation(1*change)
+        #game.grid.get_tile(tile[0], tile[1]).change_elevation(random.randint(0,1))
+        game.grid.get_tile(tile[0], tile[1]).change_elevation(1*change)
 def elevation_random_walk(seeds):
     for island in seeds:
         walks = random.randint(5, 200)
@@ -145,10 +150,10 @@ def elevation_random_walk(seeds):
                 bump_elvt(temploc[0],temploc[1],1)
             else:
                 bump_elvt(temploc[0],temploc[1],-3)  
-            temploc = random.choice(grid.get_neighbors(temploc[0],temploc[1],8))
+            temploc = random.choice(game.grid.get_neighbors(temploc[0],temploc[1],8))
             
-def animate_water(grid, time):
-    if time % 3 == 0:
+def animate_water(grid, time, mod):
+    if time % mod == 0:
         for x in grid.watergen():
             rand = random.random() 
             if  rand > .96:
@@ -175,58 +180,68 @@ class Player:
 
 
 
+#grid = Grid(int(world[0]), world[1],20)
+#player = Player(grid)
+game = Game(int(world[0]), world[1],20)
 
-
-grid = Grid(int(world[0]), world[1],20)
-seed = random.sample([x for x in grid.tilegen()],random.randint(5, 200))
+seed = random.sample([x for x in game.grid.tilegen()],random.randint(5, 200))
 time = 0
-player = Player(grid)
+
 
 elevation_random_walk(seed)
-print player.location, player.currentCell.get_loc()
+print game.player.location, game.player.currentCell.get_loc()
 
 while 1:
-    clock.tick(1000)
-    player.updateCurrentCell
+    clock.tick(30)
+    game.player.updateCurrentCell
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-        elif event.type == pygame.KEYDOWN:
+
+        elif event.type == pygame.KEYDOWN and game.runningstate == "WorldMap":
             if event.key == pygame.K_UP:
-                player.updateLocation((0, -1))
+                game.player.updateLocation((0, -1))
             if event.key == pygame.K_DOWN:
-                player.updateLocation((0, 1))
+                game.player.updateLocation((0, 1))
             if event.key == pygame.K_LEFT:
-                player.updateLocation((-1, 0))      
+                game.player.updateLocation((-1, 0))      
             if event.key == pygame.K_RIGHT:
-                player.updateLocation((1,0))
-                        
-                
+                game.player.updateLocation((1,0))
+            if event.key == pygame.K_RIGHT and event.key == pygame.K_DOWN:
+                game.player.updateLocation((1, 1))
+            if event.key == pygame.K_ESCAPE: 
+                game.runningstate = "Menu"
+        elif event.type == pygame.KEYDOWN and game.runningstate == "Menu":
+            if event.key == pygame.K_ESCAPE: 
+                game.runningstate = "WorldMap"        
     #screen.fill(BLACK)
     #calculations for current screen
 
-    cellminx = (player.location[0] - size[0]/2)
-    cellmaxx = (player.location[0] + size[0]/2)
-    cellminy = (player.location[1] - size[1]/2)
-    cellmaxy = (player.location[1] + size[1]/2)  
-    xoffset  = (player.location[0] - size[0]/2)
-    yoffset  = (player.location[1] - size[1]/2)
-    print player.location   
-    print cellminx, cellmaxx
-    for cell in grid.tilegen():
-            
-        if((cellminx <= cell.get_loc()[0] <= cellmaxx) and (cellminy <= cell.get_loc()[1] <= cellmaxy)):
-            pygame.draw.rect(screen, cell.get_col(), [cell.get_loc()[0] - xoffset, cell.get_loc()[1] - yoffset,
-                                            grid.get_tile_size(),
-                                            grid.get_tile_size()],
-                            0)
-    #animate_water(grid, time)     
-    pygame.draw.rect(screen, colors.red2, [player.location[0] - xoffset, player.location[1] - yoffset,
-                                        grid.get_tile_size(), 
-                                        grid.get_tile_size()],
+    cellminx = (game.player.location[0] - size[0]/2)
+    cellmaxx = (game.player.location[0] + size[0]/2)
+    cellminy = (game.player.location[1] - size[1]/2)
+    cellmaxy = (game.player.location[1] + size[1]/2)  
+    xoffset  = (game.player.location[0] - size[0]/2)
+    yoffset  = (game.player.location[1] - size[1]/2)
+    if(game.runningstate == "WorldMap"): 
+        for cell in game.grid.tilegen():
+                
+            if((cellminx <= cell.get_loc()[0] <= cellmaxx) and (cellminy <= cell.get_loc()[1] <= cellmaxy)):
+                pygame.draw.rect(screen, cell.get_col(), [cell.get_loc()[0] - xoffset, cell.get_loc()[1] - yoffset,
+                                                game.grid.get_tile_size(),
+                                                game.grid.get_tile_size()],
+                                0)
+        animate_water(game.grid, time, 15)     
+        pygame.draw.rect(screen, colors.red4, [game.player.location[0] - xoffset, game.player.location[1] - yoffset,
+                                            game.grid.get_tile_size(), 
+                                            game.grid.get_tile_size()],
+                                            0) 
+    if(game.runningstate == "Menu"):
+            pygame.draw.rect(screen, colors.black, [100,100,300,300],
                                         0) 
-
-    pygame.display.flip()
+            pygame.draw.rect(screen, colors.white, [102,102,296,296],
+                                        6) 
+    pygame.display.flip() 
     time +=1
-
+    
     
