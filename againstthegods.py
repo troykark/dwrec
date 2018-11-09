@@ -165,17 +165,19 @@ class Player:
     '''
     def __init__(self, gridobject):
         self.location = x, y = (size[0]/2), (size[1]/2)
-        self.currentCell = grid.cells[self.location[0]/gridobject.get_tile_size()][self.location[1]/gridobject.get_tile_size()]
-    def updateCurrentCell():
-        self.currentCell = grid.cells[self.location[0]/gridobject.get_tile_size()][self.location[1]/gridobject.get_tile_size()]
-        
+        self.currentCell = gridobject.cells[self.location[0]/gridobject.get_tile_size()][self.location[1]/gridobject.get_tile_size()]
+        self.gridobject = gridobject
+    def updateCurrentCell(self):
+        self.currentCell = self.gridobject.cells[self.location[0]/self.gridobject.get_tile_size()][self.location[1]/self.gridobject.get_tile_size()]
+    def updateLocation(self, vector):
+        self.location = self.location[0] + (vector[0] * self.gridobject.get_tile_size()), self.location[1] + (vector[1] * self.gridobject.get_tile_size())   
+        self.updateCurrentCell()
 
 
 
 
 
-
-grid = Grid(int(world[0]), world[1],10)
+grid = Grid(int(world[0]), world[1],20)
 seed = random.sample([x for x in grid.tilegen()],random.randint(5, 200))
 time = 0
 player = Player(grid)
@@ -189,7 +191,16 @@ while 1:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-          
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                player.updateLocation((0, -1))
+            if event.key == pygame.K_DOWN:
+                player.updateLocation((0, 1))
+            if event.key == pygame.K_LEFT:
+                player.updateLocation((-1, 0))      
+            if event.key == pygame.K_RIGHT:
+                player.updateLocation((1,0))
+                        
                 
     #screen.fill(BLACK)
     #calculations for current screen
@@ -217,5 +228,5 @@ while 1:
 
     pygame.display.flip()
     time +=1
-    player.location = player.location[0] + 10, player.location[1]
+
     
