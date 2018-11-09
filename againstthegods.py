@@ -3,13 +3,6 @@ pygame.init()
 
 size = width, height = 800,600
 world = width, height = 3400,2000
-BLACK = ( 0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE =  (0, 0, 255)
-GREEN = (0, 255, 0)
-RED =   (255, 0, 0)
-BROWN = (139, 69, 19)
-YELLOW = (255, 255, 0)
 clock = pygame.time.Clock()
 color_elevation = {0:colors.blue4, 1: colors.blue8, 2:colors.blue9, 3:colors.yellow8, 4:colors.yellow6,
                    5:colors.green9, 6: colors.green8, 7: colors.green7,8:colors.green6,
@@ -60,7 +53,7 @@ class Grid:
         for row in range(0, self.height, tile_size):
             self.cells.append([])
             for col in range(0, self.width, tile_size):
-                self.cells[row/tile_size].append((Tile((row,col),BLACK)))
+                self.cells[row/tile_size].append((Tile((row,col),colors.black)))
                
     def tilegen(self):
         """
@@ -240,7 +233,7 @@ while 1:
             pygame.draw.rect(screen, colors.black, [100,100,300,300],
                                         0) 
             pygame.draw.rect(screen, colors.white, [102,102,296,296],
-                                        6) 
+                                        4) 
     pygame.display.flip() 
     time +=1
     
