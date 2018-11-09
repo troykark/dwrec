@@ -1,8 +1,8 @@
 import sys, pygame, random, colors, math
 pygame.init()
 
-size = width, height = 1300,800
-
+size = width, height = 800,600
+world = width, height = 3400,2000
 BLACK = ( 0, 0, 0)
 WHITE = (255, 255, 255)
 BLUE =  (0, 0, 255)
@@ -144,7 +144,7 @@ def elevation_random_walk(seeds):
             if random.choice([0,1,1,1]):
                 bump_elvt(temploc[0],temploc[1],1)
             else:
-                bump_elvt(temploc[0],temploc[1],-3)   
+                bump_elvt(temploc[0],temploc[1],-3)  
             temploc = random.choice(grid.get_neighbors(temploc[0],temploc[1],8))
             
 def animate_water(grid, time):
@@ -158,35 +158,64 @@ def animate_water(grid, time):
             elif rand > .75:
                 x.set_col(colors.blue7)
 
+class Player:
+    '''
+    Display information for the the tiles of he map screen.  Does not contain
+    gameplay information just information required to correctly display info.
+    '''
+    def __init__(self, gridobject):
+        self.location = x, y = (size[0]/2), (size[1]/2)
+        self.currentCell = grid.cells[self.location[0]/gridobject.get_tile_size()][self.location[1]/gridobject.get_tile_size()]
+    def updateCurrentCell():
+        self.currentCell = grid.cells[self.location[0]/gridobject.get_tile_size()][self.location[1]/gridobject.get_tile_size()]
+        
 
 
 
 
 
-grid = Grid(int(size[0]-size[0]*0.24), size[1],10)
-seed = random.sample([x for x in grid.tilegen()],10)
+
+grid = Grid(int(world[0]), world[1],10)
+seed = random.sample([x for x in grid.tilegen()],random.randint(5, 200))
 time = 0
+player = Player(grid)
 
 elevation_random_walk(seed)
-
+print player.location, player.currentCell.get_loc()
 
 while 1:
     clock.tick(1000)
+    player.updateCurrentCell
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
           
                 
-    screen.fill(BLACK)
-            
+    #screen.fill(BLACK)
+    #calculations for current screen
+
+    cellminx = (player.location[0] - size[0]/2)
+    cellmaxx = (player.location[0] + size[0]/2)
+    cellminy = (player.location[1] - size[1]/2)
+    cellmaxy = (player.location[1] + size[1]/2)  
+    xoffset  = (player.location[0] - size[0]/2)
+    yoffset  = (player.location[1] - size[1]/2)
+    print player.location   
+    print cellminx, cellmaxx
     for cell in grid.tilegen():
             
-        
-
-        pygame.draw.rect(screen, cell.get_col(), [cell.get_loc()[0], cell.get_loc()[1],
-                                        grid.get_tile_size(),
+        if((cellminx <= cell.get_loc()[0] <= cellmaxx) and (cellminy <= cell.get_loc()[1] <= cellmaxy)):
+            pygame.draw.rect(screen, cell.get_col(), [cell.get_loc()[0] - xoffset, cell.get_loc()[1] - yoffset,
+                                            grid.get_tile_size(),
+                                            grid.get_tile_size()],
+                            0)
+    #animate_water(grid, time)     
+    pygame.draw.rect(screen, colors.red2, [player.location[0] - xoffset, player.location[1] - yoffset,
+                                        grid.get_tile_size(), 
                                         grid.get_tile_size()],
-                        0)
+                                        0) 
+
     pygame.display.flip()
     time +=1
+    player.location = player.location[0] + 10, player.location[1]
     
