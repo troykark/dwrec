@@ -14,6 +14,7 @@ class Game:
         self.runningstate = "WorldMap"
         self.grid   = Grid(height, width, tile_size)
         self.player = Player(self.grid)
+        self.updateGrid = False
 
 class Tile:
     '''
@@ -167,8 +168,9 @@ class Player:
         self.gridobject = gridobject
     def updateCurrentCell(self):
         self.currentCell = self.gridobject.cells[self.location[0]/self.gridobject.get_tile_size()][self.location[1]/self.gridobject.get_tile_size()]
-    def updateLocation(self, vector):
-        self.location = self.location[0] + (vector[0] * self.gridobject.get_tile_size()), self.location[1] + (vector[1] * self.gridobject.get_tile_size())   
+    def updateLocation(self, vector, gameObj):
+        self.location = self.location[0] + (vector[0] * self.gridobject.get_tile_size()), self.location[1] + (vector[1] * self.gridobject.get_tile_size()) 
+        gameObj.updateGrid = True   
         self.updateCurrentCell()
 
 
@@ -193,15 +195,15 @@ while 1:
 
         elif event.type == pygame.KEYDOWN and game.runningstate == "WorldMap":
             if event.key == pygame.K_UP:
-                game.player.updateLocation((0, -1))
+                game.player.updateLocation((0, -1), game)
             if event.key == pygame.K_DOWN:
-                game.player.updateLocation((0, 1))
+                game.player.updateLocation((0, 1), game)
             if event.key == pygame.K_LEFT:
-                game.player.updateLocation((-1, 0))      
+                game.player.updateLocation((-1, 0), game)      
             if event.key == pygame.K_RIGHT:
-                game.player.updateLocation((1,0))
+                game.player.updateLocation((1,0), game)
             if event.key == pygame.K_RIGHT and event.key == pygame.K_DOWN:
-                game.player.updateLocation((1, 1))
+                game.player.updateLocation((1, 1), game)
             if event.key == pygame.K_ESCAPE: 
                 game.runningstate = "Menu"
         elif event.type == pygame.KEYDOWN and game.runningstate == "Menu":
@@ -217,13 +219,15 @@ while 1:
     xoffset  = (game.player.location[0] - size[0]/2)
     yoffset  = (game.player.location[1] - size[1]/2)
     if(game.runningstate == "WorldMap"): 
-        for cell in game.grid.tilegen():
-                
-            if((cellminx <= cell.get_loc()[0] <= cellmaxx) and (cellminy <= cell.get_loc()[1] <= cellmaxy)):
-                pygame.draw.rect(screen, cell.get_col(), [cell.get_loc()[0] - xoffset, cell.get_loc()[1] - yoffset,
-                                                game.grid.get_tile_size(),
-                                                game.grid.get_tile_size()],
-                                0)
+        if(game.updateGrid == True):
+            for cell in game.grid.tilegen():
+                    
+                if((cellminx <= cell.get_loc()[0] <= cellmaxx) and (cellminy <= cell.get_loc()[1] <= cellmaxy)):
+                    pygame.draw.rect(screen, cell.get_col(), [cell.get_loc()[0] - xoffset, cell.get_loc()[1] - yoffset,
+                                                    game.grid.get_tile_size(),
+                                                    game.grid.get_tile_size()],
+                                    0)
+            game.updateGrid = False
         animate_water(game.grid, time, 15)     
         pygame.draw.rect(screen, colors.red4, [game.player.location[0] - xoffset, game.player.location[1] - yoffset,
                                             game.grid.get_tile_size(), 
