@@ -4,10 +4,10 @@ pygame.init()
 size = width, height = 800,600
 world = width, height = 3400,2000
 clock = pygame.time.Clock()
-color_elevation = {0:colors.blue4, 1: colors.blue8, 2:colors.blue9, 3:colors.yellow8, 4:colors.yellow6,
-                   5:colors.green9, 6: colors.green8, 7: colors.green7,8:colors.green6,
-                   9:colors.green5, 10:colors.green4, 11:colors.green4,
-                   12:colors.gray4, 13:colors.gray6, 14:colors.gray8, 15:colors.white}
+color_elevation = {0:colors.blue4, 1: colors.blue8, 2:colors.blue9, 3:colors.green8, 4:colors.green8,
+                   5:colors.green8, 6: colors.green8, 7: colors.green8,8:colors.green8,
+                   9:colors.green8, 10:colors.green8, 11:colors.green8,
+                   12:colors.yellow8, 13:colors.gray8, 14:colors.gray8, 15:colors.white}
 screen = pygame.display.set_mode(size)
 class Game: 
     def __init__(self, height, width, tile_size):
@@ -228,7 +228,7 @@ while 1:
                                                     game.grid.get_tile_size()],
                                     0)
             game.updateGrid = False
-        animate_water(game.grid, time, 15)     
+        #animate_water(game.grid, time, 15)     
         pygame.draw.rect(screen, colors.red4, [game.player.location[0] - xoffset, game.player.location[1] - yoffset,
                                             game.grid.get_tile_size(), 
                                             game.grid.get_tile_size()],
